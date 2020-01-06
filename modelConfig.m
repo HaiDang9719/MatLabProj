@@ -1,4 +1,4 @@
-function cfg = modeConfig()
+function cfg = modelConfig()
     %% Execution mode:
     %% "train" :
     %%     - ARIMA and VAR do grid search to confirm the optimal params.
