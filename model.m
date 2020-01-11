@@ -3,7 +3,6 @@ MAIN();
 function MAIN()
     cfg = modelConfig();
     [label,text] = textPreprocessing()
-    
 %     [eurusd, ~] = eurusdDataset(cfg.dataset.csvPath, "");
 %     eurusdStandardized = eurusdStandardize(eurusd);
 %     [eurusdTrain, ~, YTest] = eurusdPartition(...
