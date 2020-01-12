@@ -13,7 +13,7 @@ addpath('preprocess');
 %% =========== Part 1: Preprocessing =============
 %% Load data
 
-[dataset] = loadData('./data/train.csv');
+[dataset] = loadData("./data/train.csv");
 
 fprintf('Program paused. Press enter to continue.\n');
 pause;
@@ -27,7 +27,7 @@ text_validation = eval_set.text;
 text_test = test_set.text;
 
 Y_train = train_set.label;
-Y_validation = eval_set.label;
+Y_val = eval_set.label;
 Y_test = test_set.label;
 
 fprintf('Program paused. Press enter to continue.\n');
@@ -72,13 +72,43 @@ X_test = doc2sequence(enc,clean_text_test,'Length',210);
 fprintf('Program paused. Press enter to continue.\n');
 pause;
 
-%% ================ Part 3: Loss function ==============================
-% Module implementation of loss function (nnLossFunction.m).
+%% ================ Part 3: LSTM model ==============================
+%% model Configuration.
 
+modeConfig = modelConfig();
+inputSize = 1;
+embeddingDimension = 100;
+numWords = enc.NumWords;
+numHiddenUnits = 180;
+numClasses = numel(categories(categorical(Y_train)));
 
-lambda = 0.5;
-[L,grads] = nnLossFunction(params,train.X,train.y,lambda);
+%% LSTM model
 
+lstmModel = [ ...
+    sequenceInputLayer(inputSize)
+    wordEmbeddingLayer(embeddingDimension,numWords)
+    lstmLayer(numHiddenUnits,'OutputMode','last')
+    fullyConnectedLayer(numClasses)
+    softmaxLayer
+    classificationLayer];
+
+%% training option for the model
+try
+    nnet.internal.cnngpu.reluForward(1);
+catch ME
+end
+options = trainingOptions('adam', ...
+    'ExecutionEnvironment','cpu',...
+    'MaxEpochs',10, ...    
+    'GradientThreshold',1, ...
+    'InitialLearnRate',0.001, ...
+    'ValidationData',{X_val,categorical(Y_val)}, ...
+    'Plots','training-progress', ...
+    'Verbose',false);
+
+%% training model
+ile=gpuArray(0.0001);
+lstmModel = trainNetwork(X_train,categorical(Y_train),lstmModel,options);
 
 %% =============== Part 4: Stochastic Gradient Descent Training ==========
 % Given the loss function, now you will implement Stochastic Gradient
@@ -113,4 +143,4 @@ fprintf('\nTest Set Accuracy: %f\n', mean(double(p == test.y)) * 100);
 
 
 %%
-rmpath('layer');
+rmpath('preprocess');
