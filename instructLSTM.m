@@ -13,7 +13,7 @@ addpath('preprocess');
 %% =========== Part 1: Preprocessing =============
 %% Load data
 
-[dataset] = loadData("./data/train.csv");
+[dataset] = loadData("dataset2Lable.csv");
 
 fprintf('Program paused. Press enter to continue.\n');
 pause;
@@ -65,9 +65,9 @@ pause;
 
 %% encoding word with doc2sequence function. Set the threshold number of words based on the document length distribution
 
-X_train = doc2sequence(enc,clean_text_train,'Length',210);
-X_val = doc2sequence(enc,clean_text_eval,'Length',210);
-X_test = doc2sequence(enc,clean_text_test,'Length',210);
+X_train = doc2sequence(enc,clean_text_train,'Length',25);
+X_val = doc2sequence(enc,clean_text_eval,'Length',25);
+X_test = doc2sequence(enc,clean_text_test,'Length',25);
 
 fprintf('Program paused. Press enter to continue.\n');
 pause;
@@ -98,7 +98,51 @@ try
 catch ME
 end
 options = trainingOptions('adam', ...
-    'ExecutionEnvironment','cpu',...
+    'ExecutionEnvironment','auto',...
+    'MaxEpochs',10, ...    
+    'GradientThreshold',1, ...
+    'InitialLearnRate',0.001, ...
+    'ValidationData',{X_val,categorical(Y_val)}, ...
+    'Plots','training-progress', ...
+    'Verbose',false);
+
+%% training model
+
+ile=gpuArray(0.0001);
+lstmModel = trainNetwork(X_train,categorical(Y_train),lstmModel,options);
+
+%% predict model
+
+YPred = classify(lstmModel,X_test);
+accuracy = sum(YPred == categorical(Y_test))/numel(YPred);
+fprintf('Accuracy.%f\n',accuracy*100);
+
+%% ================ Part 4: BiLSTM model ==============================
+%% model Configuration.
+
+modeConfig = modelConfig();
+inputSize = 1;
+embeddingDimension = 100;
+numWords = enc.NumWords;
+numHiddenUnits = 180;
+numClasses = numel(categories(categorical(Y_train)));
+
+%% BiLSTM model
+
+bilstmModel = [ ...
+    sequenceInputLayer(inputSize)
+    bilstmLayer(numHiddenUnits,'OutputMode','last')
+    fullyConnectedLayer(numClasses)
+    softmaxLayer
+    classificationLayer];
+
+%% training option for the model
+try
+    nnet.internal.cnngpu.reluForward(1);
+catch ME
+end
+options = trainingOptions('adam', ...
+    'ExecutionEnvironment','auto',...
     'MaxEpochs',10, ...    
     'GradientThreshold',1, ...
     'InitialLearnRate',0.001, ...
@@ -108,39 +152,10 @@ options = trainingOptions('adam', ...
 
 %% training model
 ile=gpuArray(0.0001);
-lstmModel = trainNetwork(X_train,categorical(Y_train),lstmModel,options);
-
-%% =============== Part 4: Stochastic Gradient Descent Training ==========
-% Given the loss function, now you will implement Stochastic Gradient
-% Descent (SGD) (trainSGD.m) to train the neural networks. 
-%
-
-learning_rate = 0.5;
-lambda = 5e-6;
-num_iters = 10000;
-batch_size = 200;
-tic
-[params,L_history] = trainSGD(params,train.X,train.y,learning_rate,...
-    lambda,num_iters,batch_size);
-fprintf('Optimization took %f seconds.\n', toc);
-figure;
-plot(L_history);
-xlabel('Iteration','FontSize',20);
-ylabel('Loss','FontSize',20);
-pause;
-
-%% ================= Part 5: Implement Predict ===========================
-%  After training the neural network, we would like to use it to predict
-%  the labels. You will now implement the "nnPredict" function to use the
-%  neural network to predict the labels of the training set and test set. 
-%  You will achieve around 100% training accuracy and around 98.0% test accuracy.
-%
-
-p = nnPredict(params,train.X);
-fprintf('\nTraining Set Accuracy: %f\n', mean(double(p == train.y)) * 100);
-p = nnPredict(params,test.X);
-fprintf('\nTest Set Accuracy: %f\n', mean(double(p == test.y)) * 100);
-
-
+bilstmModel = trainNetwork(X_train,categorical(Y_train),bilstmModel,options);
+%% predict model
+YPred = classify(bilstmModel,X_test);
+bilstm_acc = sum(YPred == categorical(Y_test))/numel(YPred);
+fprintf('Accuracy for BiLSTM: %f\n',bilstm_acc*100);
 %%
 rmpath('preprocess');
