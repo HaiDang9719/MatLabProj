@@ -9,6 +9,7 @@
 %% Initialization
 clear; close all; clc
 addpath('preprocess');
+addpath('evaluation');
 
 %% =========== Part 1: Preprocessing =============
 %% Load data
@@ -93,6 +94,7 @@ lstmModel = [ ...
     classificationLayer];
 
 %% training option for the model
+
 try
     nnet.internal.cnngpu.reluForward(1);
 catch ME
@@ -110,12 +112,18 @@ options = trainingOptions('adam', ...
 
 ile=gpuArray(0.0001);
 lstmModel = trainNetwork(X_train,categorical(Y_train),lstmModel,options);
+%% save model
 
 %% predict model
 
-YPred = classify(lstmModel,X_test);
-accuracy = sum(YPred == categorical(Y_test))/numel(YPred);
-fprintf('Accuracy.%f\n',accuracy*100);
+Y_pred = classify(lstmModel,X_test);
+lstm_acc = model_Acc(categorical(Y_test),Y_pred);
+fprintf('Accuracy for BiLSTM: %f\n',lstm_acc*100);
+
+[lsPre, lsRe, lsFS] = model_FScore(categorical(Y_test),Y_pred);
+fprintf('Precision for BiLSTM: %f\n',lsPre);
+fprintf('Recal for BiLSTM: %f\n',lsRe);
+fprintf('FScore for BiLSTM: %f\n',lsFS);
 
 %% ================ Part 4: BiLSTM model ==============================
 %% model Configuration.
@@ -137,6 +145,7 @@ bilstmModel = [ ...
     classificationLayer];
 
 %% training option for the model
+
 try
     nnet.internal.cnngpu.reluForward(1);
 catch ME
@@ -151,11 +160,22 @@ options = trainingOptions('adam', ...
     'Verbose',false);
 
 %% training model
+
 ile=gpuArray(0.0001);
 bilstmModel = trainNetwork(X_train,categorical(Y_train),bilstmModel,options);
+
 %% predict model
-YPred = classify(bilstmModel,X_test);
-bilstm_acc = sum(YPred == categorical(Y_test))/numel(YPred);
+
+Y_pred = classify(bilstmModel,X_test);
+
+bilstm_acc = model_Acc(categorical(Y_test),Y_pred);
 fprintf('Accuracy for BiLSTM: %f\n',bilstm_acc*100);
+
+[biPre, biRe, biFS] = model_FScore(categorical(Y_test),Y_pred);
+fprintf('Precision for BiLSTM: %f\n',biPre);
+fprintf('Recal for BiLSTM: %f\n',biRe);
+fprintf('FScore for BiLSTM: %f\n',biFS);
+
 %%
 rmpath('preprocess');
+rmpath('evaluation');
