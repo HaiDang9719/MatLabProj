@@ -12,3 +12,5 @@
         4. Text Analytics Toolbox
 
         5. Text Analytics Toolbox Model for fastText English 16 Billion Token Word Embedding 
+
+        6. Bioinformatics Toolbox

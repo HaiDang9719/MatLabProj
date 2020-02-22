@@ -17,7 +17,7 @@ addpath('save_models');
 [dataset] = loadData("dataset2Lable.csv");
 
 fprintf('Program paused. Press enter to continue.\n');
-pause;
+% pause;
 
 %% partioning data set
 
@@ -32,7 +32,7 @@ Y_val = eval_set.label;
 Y_test = test_set.label;
 
 fprintf('Program paused. Press enter to continue.\n');
-pause;
+% pause;
 
 %% clean data set
 
@@ -68,9 +68,9 @@ ylabel("Number of Documents")
 
 %% encoding word with doc2sequence function. Set the threshold number of words based on the document length distribution
 
-X_train = doc2sequence(enc,clean_text_train,'Length',25);
-X_val = doc2sequence(enc,clean_text_eval,'Length',25);
-X_test = doc2sequence(enc,clean_text_test,'Length',25);
+X_train = doc2sequence(enc,clean_text_train,'Length',10);
+X_val = doc2sequence(enc,clean_text_eval,'Length',10);
+X_test = doc2sequence(enc,clean_text_test,'Length',10);
 
 % fprintf('Program paused. Press enter to continue.\n');
 % pause;
@@ -152,7 +152,7 @@ numClasses = numel(categories(categorical(Y_train)));
 
 bilstmModel = [ ...
     sequenceInputLayer(inputSize)
-%      wordEmbeddingLayer(embeddingDimension,numWords)
+    wordEmbeddingLayer(embeddingDimension,numWords)
     bilstmLayer(numHiddenUnits,'OutputMode','last')
     fullyConnectedLayer(numClasses)
     softmaxLayer
