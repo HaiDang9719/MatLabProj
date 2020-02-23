@@ -1,7 +1,13 @@
 
-cfg = modelConfig();
+clear; close all; clc
 initialization();
 
+if ~(exist('cfg'))
+    cfg = modelConfig();
+end
+if  cfg.execMode == "test"
+    cfg.dataset.kfoldvalidation = false;
+end
 %Load dataset
 fprintf('Load dataset.\n');
 [dataset] = loadData(cfg.dataset.path);
@@ -28,6 +34,9 @@ else
     clean_text_train = cell(cfg.dataset.kfold,1);
     clean_text_eval = cell(cfg.dataset.kfold,1);
     clean_text_test = cell(cfg.dataset.kfold,1);
+    Y_train=cell(cfg.dataset.kfold,1);
+    Y_val=cell(cfg.dataset.kfold,1);
+    Y_test=cell(cfg.dataset.kfold,1);
     for i=1:cfg.dataset.kfold
         % Call index of training & testing sets
         trainIdx=fold.training(i); testIdx=fold.test(i);
@@ -43,9 +52,9 @@ else
         text_validation = eval_set.text;
         text_test = test_set.text;
 
-        Y_train = train_set.label;
-        Y_val = eval_set.label;
-        Y_test = test_set.label;
+        Y_train{i} = train_set.label;
+        Y_val{i} = eval_set.label;
+        Y_test{i} = test_set.label;
         
         [clean_text_train{i}] = textPreprocessing(text_train);
         [clean_text_eval{i}] = textPreprocessing(text_validation);
@@ -54,7 +63,7 @@ else
 end
 
 function initialization()
-    clear; close all; clc
+    
     addpath('preprocess');
     addpath('evaluation');
     addpath('model');

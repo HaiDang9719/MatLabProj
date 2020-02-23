@@ -1,0 +1,24 @@
+Result of LSTM on test set with kfold cross validation: 
+Accuracy for LSTM: 59.905123
+Precision for LSTM: 0.639557
+Recal for LSTM: 0.786834
+FScore for LSTM: 0.704534
+FP for LSTM: 0.360443
+AUC for LSTM: 0.786834
+
+Result of BiLSTM on test set with kflod cross validation: 
+Accuracy for BiLSTM: 59.165085
+Precision for BiLSTM: 0.636691
+Recal for BiLSTM: 0.771265
+FScore for BiLSTM: 0.695322
+FP for BiLSTM: 0.363309
+AUC for BiLSTM: 0.771265
+
+Train BILSTM ...: 
+Result of BiLSTM on test set: 
+Accuracy for BiLSTM: 61.024182
+Precision for BiLSTM: 0.636310
+Recal for BiLSTM: 0.842146
+FScore for BiLSTM: 0.724900
+FP for BiLSTM: 0.363690
+AUC for BiLSTM: 0.842146

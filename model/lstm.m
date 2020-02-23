@@ -6,17 +6,6 @@ inputSize = 1;
 numHiddenUnits = 180;
 numClasses = 2;
 
-%% LSTM model
-
-lstmModel = [ ...
-    sequenceInputLayer(inputSize)
-    wordEmbeddingLayer(embeddingDimension,numWords)
-
-    lstmLayer(numHiddenUnits,'OutputMode','last')
-    fullyConnectedLayer(numClasses)
-    softmaxLayer
-    classificationLayer];
-
 %% training and testing model
 if (~cfg.dataset.kfoldvalidation)
     
@@ -33,9 +22,9 @@ if (~cfg.dataset.kfoldvalidation)
     end
     % encoding word with doc2sequence function. Set the threshold number of words based on the document length distribution
 
-    X_train = doc2sequence(enc,clean_text_train,'Length',10);
-    X_val = doc2sequence(enc,clean_text_eval,'Length',10);
-    X_test = doc2sequence(enc,clean_text_test,'Length',10);
+    X_train = doc2sequence(enc,clean_text_train,'Length',16);
+    X_val = doc2sequence(enc,clean_text_eval,'Length',16);
+    X_test = doc2sequence(enc,clean_text_test,'Length',16);
 
     % training option for the model
 
@@ -43,6 +32,18 @@ if (~cfg.dataset.kfoldvalidation)
         nnet.internal.cnngpu.reluForward(1);
     catch ME
     end
+    
+    %LSTM model
+    lstmModel = [ ...
+    sequenceInputLayer(inputSize)
+    wordEmbeddingLayer(embeddingDimension,numWords)
+
+    lstmLayer(numHiddenUnits,'OutputMode','last')
+    fullyConnectedLayer(numClasses)
+    softmaxLayer
+    classificationLayer];
+    
+    %Option
     options = trainingOptions('adam', ...
         'ExecutionEnvironment','auto',...
         'MaxEpochs',10, ...    
@@ -52,9 +53,13 @@ if (~cfg.dataset.kfoldvalidation)
         'Plots','training-progress', ...
         'Verbose',false, ...
         'OutputFcn',@(info)stopIfAccuracyNotImproving(info,3));
-        %training
-        lstmModel = trainNetwork(X_train,categorical(Y_train),lstmModel,options);
-
+    
+    %training
+    lstmModel = trainNetwork(X_train,categorical(Y_train),lstmModel,options);
+    
+    %save model
+    saveModel(lstmModel);
+    
     %testing
     fprintf('Result of LSTM on test set: \n');
     Y_pred_ls = classify(lstmModel,X_test);
@@ -88,9 +93,9 @@ else
         end
         % encoding word with doc2sequence function. Set the threshold number of words based on the document length distribution
 
-        X_train = doc2sequence(enc,clean_text_train{i},'Length',10);
-        X_val = doc2sequence(enc,clean_text_eval{i},'Length',10);
-        X_test = doc2sequence(enc,clean_text_test{i},'Length',10);
+        X_train = doc2sequence(enc,clean_text_train{i},'Length',16);
+        X_val = doc2sequence(enc,clean_text_eval{i},'Length',16);
+        X_test = doc2sequence(enc,clean_text_test{i},'Length',16);
 
         % training option for the model
 
@@ -108,27 +113,33 @@ else
             fullyConnectedLayer(numClasses)
             softmaxLayer
             classificationLayer];
+        
         options = trainingOptions('adam', ...
             'ExecutionEnvironment','auto',...
             'MaxEpochs',10, ...    
             'GradientThreshold',1, ...
             'InitialLearnRate',0.001, ...
-            'ValidationData',{X_val,categorical(Y_val)}, ...
+            'ValidationData',{X_val,categorical(Y_val{i})}, ...
             'Verbose',false, ...
             'OutputFcn',@(info)stopIfAccuracyNotImproving(info,3));
-            %training
-            lstmModel = trainNetwork(X_train,categorical(Y_train),lstmModel,options);
+        
+        %training
+        lstmModel = trainNetwork(X_train,categorical(Y_train{i}),lstmModel,options);
 
         %testing
         
         Y_pred_ls = classify(lstmModel,X_test);
-        lstm_acc(i) = model_Acc(categorical(Y_test),Y_pred_ls);
+        lstm_acc(i) = model_Acc(categorical(Y_test{i}),Y_pred_ls);
         
 
-        [lsPre(i), lsRe(i), lsFS(i),lsFB(i),lsAUC(i)] = model_FScore(categorical(Y_test),Y_pred_ls);
+        [lsPre(i), lsRe(i), lsFS(i),lsFB(i),lsAUC(i)] = model_FScore(categorical(Y_test{i}),Y_pred_ls);
         
     end
-    fprintf('Result of LSTM on test set: \n');
+    %save model
+    saveModel(lstmModel);
+    
+    %print result
+    fprintf('Result of LSTM on test set with kfold cross validation: \n');
     fprintf('Accuracy for LSTM: %f\n',mean(lstm_acc)*100);
     fprintf('Precision for LSTM: %f\n',mean(lsPre));
     fprintf('Recal for LSTM: %f\n',mean(lsRe));
@@ -137,11 +148,11 @@ else
     fprintf('AUC for LSTM: %f\n',mean(lsAUC));
 end
 %% save model
+function saveModel(lstmModel)
+    save('save_models/lstmModel','lstmModel')
+end
 
-%% predict model
-
-    
-
+%% early stoping function
 function stop = stopIfAccuracyNotImproving(info,N)
 
 stop = false;

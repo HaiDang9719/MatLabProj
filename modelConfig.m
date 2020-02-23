@@ -6,16 +6,24 @@ function cfg = modelConfig()
     % set
     cfg.dataset.splitRatio = 0.2;
     %kford
-    cfg.dataset.kfoldvalidation = true;
+    cfg.dataset.kfoldvalidation = false;
     cfg.dataset.kfold = 10;
     
     
     % Model:
-    %model
-    cfg.model.MLmodel = "lstm";
+    %model (lstm, bilstm, cnn)
+    cfg.model.MLmodel = "cnn";
     %pretrained wordembedding layer with fastTextWordEmbedding
     cfg.model.fastTextWordEmbedding = false;
+    %save lstm path
+    cfg.model.pretrainedLSTM = "save_models/lstmModel";
+    %save bilstm path
+    cfg.model.pretrainedBiLSTM = "save_models/bilstmModel";
+    %save cnn path
+    cfg.model.pretrainedCNN = "save_models/cnnModel";
     
+    % Execution mode:("train/test")
+    cfg.execMode = "train";
     
 
     
