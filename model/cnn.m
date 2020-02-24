@@ -17,6 +17,16 @@ if (~cfg.dataset.kfoldvalidation)
     X_val = doc2sequence(enc,clean_text_eval,'Length',16);
     X_test = doc2sequence(enc,clean_text_test,'Length',16);
     
+    %Load data
+    filenameTrain = cfg.dataset.path;
+    textName = "headline";
+    labelName = "label";
+    ttdsTrain = tabularTextDatastore(filenameTrain,'SelectedVariableNames',[textName labelName]);
+    [trainingImages, testImages] = splitEachLabel(ttdsTrain, 0.8, 'randomize');
+    labels = readLabels(ttdsTrain,labelName);
+    classNames = unique(labels);
+    numObservations = numel(labels);
+
     numFeatures = 100;
     inputSize = [1 16 numFeatures];
     numFilters = 200;
@@ -24,7 +34,8 @@ if (~cfg.dataset.kfoldvalidation)
     ngramLengths = [2 3 4 5];
     numBlocks = numel(ngramLengths);
 
-    numClasses = numel(classNames);
+    numClasses = 2;
+    sequenceLength = 16;
     layer = imageInputLayer(inputSize,'Normalization','none','Name','input');
     lgraph = layerGraph(layer);
     
@@ -61,11 +72,11 @@ if (~cfg.dataset.kfoldvalidation)
     'MaxEpochs',10, ...
     'MiniBatchSize',miniBatchSize, ...
     'Shuffle','never', ...
-    'ValidationData',[X_val,num2cell(Y_val)], ...
+    'ValidationData',{X_val,categorical(Y_val)}, ...
     'ValidationFrequency',numIterationsPerEpoch, ...
     'Plots','training-progress', ...
     'Verbose',false);
-    net = trainNetwork([X_train,num2cell(Y_train)],lgraph,options);
+    net = trainNetwork(X_train,num2cell(Y_train),lgraph,options);
     % training option for the model
 % 
 %     try

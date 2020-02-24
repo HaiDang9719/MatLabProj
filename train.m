@@ -1,3 +1,4 @@
+cfg = modelConfig();
 if cfg.execMode == "train"
     fprintf('Train %s ...: \n',upper(cfg.model.MLmodel));
     if(cfg.model.MLmodel == "lstm")
