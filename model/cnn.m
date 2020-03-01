@@ -7,10 +7,12 @@ if (~cfg.dataset.kfoldvalidation)
         words = enc.Vocabulary;
         numWords = numel(words);
     else
-        enc = wordEncoding(clean_text_train);
+        enc = trainWordEmbedding(clean_text_train);
         embeddingDimension = 100;
-        numWords = enc.NumWords;
+ 
     end
+   
+        
     % encoding word with doc2sequence function. Set the threshold number of words based on the document length distribution
 
     X_train = doc2sequence(enc,clean_text_train,'Length',16);
@@ -21,21 +23,99 @@ if (~cfg.dataset.kfoldvalidation)
     filenameTrain = cfg.dataset.path;
     textName = "headline";
     labelName = "label";
-    ttdsTrain = tabularTextDatastore(filenameTrain,'SelectedVariableNames',[textName labelName]);
-    [trainingImages, testImages] = splitEachLabel(ttdsTrain, 0.8, 'randomize');
-    labels = readLabels(ttdsTrain,labelName);
-    classNames = unique(labels);
-    numObservations = numel(labels);
+%     ttdsTrain = tabularTextDatastore(filenameTrain,'SelectedVariableNames',[textName labelName]);
+%     [trainingImages, testImages] = splitEachLabel(ttdsTrain, 0.8, 'randomize');
+%     labels = readLabels(ttdsTrain,labelName);
 
-    numFeatures = 100;
+    predictorsTrain = cellfun(@(X) permute(X,[3 2 1]),X_train,'UniformOutput',false);
+    predictorsTest = cellfun(@(X) permute(X,[3 2 1]),X_test,'UniformOutput',false);
+    predictorsEval = cellfun(@(X) permute(X,[3 2 1]),X_val,'UniformOutput',false);
+    
+    responsesTrain = categorical(Y_train,unique(Y_train));
+    responsesTest = categorical(Y_test,unique(Y_test));
+    responsesEval = categorical(Y_val,unique(Y_val));
+    
+    dataTransformedTrain = table(predictorsTrain,responsesTrain);
+    dataTransformedTest = table(predictorsTest,responsesTest);
+    dataTransformedEval = table(predictorsEval,responsesEval);
+    numClasses = 2;
+    sequenceLength = 16;
+    buildandTrainCNN(embeddingDimension,Y_train,Y_test,sequenceLength,numClasses,dataTransformedEval,dataTransformedTest,dataTransformedTrain, false);
+
+elseif (cfg.dataset.kfoldvalidation)
+    cnn_acc=zeros(cfg.dataset.kfold,1); 
+    cnnPre=zeros(cfg.dataset.kfold,1); 
+    cnnRe=zeros(cfg.dataset.kfold,1); 
+    cnnFS=zeros(cfg.dataset.kfold,1); 
+    cnnFB=zeros(cfg.dataset.kfold,1); 
+    cnnAUC=zeros(cfg.dataset.kfold,1); 
+    for i=1:cfg.dataset.kfold
+        % create dictionary
+        if (cfg.model.fastTextWordEmbedding)
+            enc = fastTextWordEmbedding;
+            embeddingDimension = enc.Dimension;
+            words = enc.Vocabulary;
+            numWords = numel(words);
+        else
+            enc = trainWordEmbedding(clean_text_train{i});
+            embeddingDimension = 100;
+
+        end
+
+        % encoding word with doc2sequence function. Set the threshold number of words based on the document length distribution
+
+        X_train = doc2sequence(enc,clean_text_train{i},'Length',16);
+        X_val = doc2sequence(enc,clean_text_eval{i},'Length',16);
+        X_test = doc2sequence(enc,clean_text_test{i},'Length',16);
+
+        %Load data
+        filenameTrain = cfg.dataset.path;
+        textName = "headline";
+        labelName = "label";
+    %     ttdsTrain = tabularTextDatastore(filenameTrain,'SelectedVariableNames',[textName labelName]);
+    %     [trainingImages, testImages] = splitEachLabel(ttdsTrain, 0.8, 'randomize');
+    %     labels = readLabels(ttdsTrain,labelName);
+
+        predictorsTrain = cellfun(@(X) permute(X,[3 2 1]),X_train,'UniformOutput',false);
+        predictorsTest = cellfun(@(X) permute(X,[3 2 1]),X_test,'UniformOutput',false);
+        predictorsEval = cellfun(@(X) permute(X,[3 2 1]),X_val,'UniformOutput',false);
+
+        responsesTrain = categorical(Y_train{i},unique(Y_train{i}));
+        responsesTest = categorical(Y_test{i},unique(Y_test{i}));
+        responsesEval = categorical(Y_val{i},unique(Y_val{i}));
+
+        dataTransformedTrain = table(predictorsTrain,responsesTrain);
+        dataTransformedTest = table(predictorsTest,responsesTest);
+        dataTransformedEval = table(predictorsEval,responsesEval);
+        numClasses = 2;
+        sequenceLength = 16;
+        [cnn_acc(i),cnnPre(i),cnnRe(i),cnnFS(i),cnnFB(i),cnnAUC(i)] = buildandTrainCNN(embeddingDimension,Y_train{i},Y_test{i},sequenceLength,numClasses,dataTransformedEval,dataTransformedTest,dataTransformedTrain, true);
+    end
+    %print result
+    fprintf('Result of CNN on test set with kfold cross validation: \n');
+    fprintf('Average Accuracy for CNN: %f\n',mean(cnn_acc)*100);
+    fprintf('Average Precision for CNN: %f\n',mean(cnnPre));
+    fprintf('Average Recal for CNN: %f\n',mean(cnnRe));
+    fprintf('Average FScore for CNN: %f\n',mean(cnnFS));
+    fprintf('Average FP for CNN: %f\n',mean(cnnFB));
+    fprintf('Average AUC for CNN: %f\n',mean(cnnAUC));
+    
+
+end
+
+%% CNN model
+function[cnn_acc,cnnPre,cnnRe,cnnFS,cnnFB,cnnAUC] = buildandTrainCNN(embeddingDimension,Y_train,Y_test,sequenceLength,numClasses,dataTransformedEval,dataTransformedTest,dataTransformedTrain,Kfold)
+%     classNames = unique(labels);
+    numObservations = numel(Y_train);
+
+    numFeatures = embeddingDimension;
     inputSize = [1 16 numFeatures];
     numFilters = 200;
 
     ngramLengths = [2 3 4 5];
     numBlocks = numel(ngramLengths);
 
-    numClasses = 2;
-    sequenceLength = 16;
+    
     layer = imageInputLayer(inputSize,'Normalization','none','Name','input');
     lgraph = layerGraph(layer);
     
@@ -67,60 +147,85 @@ if (~cfg.dataset.kfoldvalidation)
     miniBatchSize = 128;
     numObservations = numel(Y_train);
     numIterationsPerEpoch = floor(numObservations/miniBatchSize);
+    if (Kfold)
+        options = trainingOptions('adam', ...
+        'MaxEpochs',10, ...
+        'MiniBatchSize',miniBatchSize, ...
+        'Shuffle','never', ...
+        'ValidationData',dataTransformedEval, ...
+        'ValidationFrequency',numIterationsPerEpoch, ...
+        'Verbose',false, ...
+        'OutputFcn',@(info)stopIfAccuracyNotImproving(info,3));
+        cnnModel = trainNetwork(dataTransformedTrain,lgraph,options);
+    else
+        options = trainingOptions('adam', ...
+        'MaxEpochs',10, ...
+        'MiniBatchSize',miniBatchSize, ...
+        'Shuffle','never', ...
+        'ValidationData',dataTransformedEval, ...
+        'ValidationFrequency',numIterationsPerEpoch, ...
+        'Plots','training-progress', ...
+        'Verbose',false, ...
+        'OutputFcn',@(info)stopIfAccuracyNotImproving(info,3));
+        cnnModel = trainNetwork(dataTransformedTrain,lgraph,options);
+    end
+    
 
-    options = trainingOptions('adam', ...
-    'MaxEpochs',10, ...
-    'MiniBatchSize',miniBatchSize, ...
-    'Shuffle','never', ...
-    'ValidationData',{X_val,categorical(Y_val)}, ...
-    'ValidationFrequency',numIterationsPerEpoch, ...
-    'Plots','training-progress', ...
-    'Verbose',false);
-    net = trainNetwork(X_train,num2cell(Y_train),lgraph,options);
-    % training option for the model
-% 
-%     try
-%         nnet.internal.cnngpu.reluForward(1);
-%     catch ME
-%     end
 %     
-%     %LSTM model
-%     lstmModel = [ ...
-%     sequenceInputLayer(inputSize)
-%     wordEmbeddingLayer(embeddingDimension,numWords)
-% 
-%     lstmLayer(numHiddenUnits,'OutputMode','last')
-%     fullyConnectedLayer(numClasses)
-%     softmaxLayer
-%     classificationLayer];
-%     
-%     %Option
-%     options = trainingOptions('adam', ...
-%         'ExecutionEnvironment','auto',...
-%         'MaxEpochs',10, ...    
-%         'GradientThreshold',1, ...
-%         'InitialLearnRate',0.001, ...
-%         'ValidationData',{X_val,categorical(Y_val)}, ...
-%         'Plots','training-progress', ...
-%         'Verbose',false, ...
-%         'OutputFcn',@(info)stopIfAccuracyNotImproving(info,3));
-%     
-%     %training
-%     lstmModel = trainNetwork(X_train,categorical(Y_train),lstmModel,options);
-%     
-%     %save model
-%     saveModel(lstmModel);
-%     
-%     %testing
-%     fprintf('Result of LSTM on test set: \n');
-%     Y_pred_ls = classify(lstmModel,X_test);
-%     lstm_acc = model_Acc(categorical(Y_test),Y_pred_ls);
-%     fprintf('Accuracy for LSTM: %f\n',lstm_acc*100);
-% 
-%     [lsPre, lsRe, lsFS,lsFB,lsAUC] = model_FScore(categorical(Y_test),Y_pred_ls);
-%     fprintf('Precision for LSTM: %f\n',lsPre);
-%     fprintf('Recal for LSTM: %f\n',lsRe);
-%     fprintf('FScore for LSTM: %f\n',lsFS);
-%     fprintf('FP for LSTM: %f\n',lsFB);
-%     fprintf('AUC for LSTM: %f\n',lsAUC);
+    %save model
+    saveModel(cnnModel);
+    
+    %testing
+    fprintf('Result of CNN on test set: \n');
+    Y_pred_ls = classify(cnnModel,dataTransformedTest);
+    cnn_acc = model_Acc(categorical(Y_test),Y_pred_ls);
+    fprintf('Accuracy for CNN: %f\n',cnn_acc*100);
+
+    [cnnPre, cnnRe, cnnFS,cnnFB,cnnAUC] = model_FScore(categorical(Y_test),Y_pred_ls);
+    fprintf('Precision for CNN: %f\n',cnnPre);
+    fprintf('Recal for CNN: %f\n',cnnRe);
+    fprintf('FScore for CNN: %f\n',cnnFS);
+    fprintf('FP for CNN: %f\n',cnnFB);
+    fprintf('AUC for CNN: %f\n',cnnAUC);
+end
+%% save model
+function saveModel(cnnModel)
+    save('save_models/cnnModel','cnnModel')
+end
+%% early stoping function
+function stop = stopIfAccuracyNotImproving(info,N)
+
+stop = false;
+
+% Keep track of the best validation accuracy and the number of validations for which
+% there has not been an improvement of the accuracy.
+persistent bestValAccuracy
+persistent valLag
+
+% Clear the variables when training starts.
+if info.State == "start"
+    bestValAccuracy = 0;
+    valLag = 0;
+    
+elseif ~isempty(info.ValidationLoss)
+    
+    % Compare the current validation accuracy to the best accuracy so far,
+    % and either set the best accuracy to the current accuracy, or increase
+    % the number of validations for which there has not been an improvement.
+    if info.ValidationAccuracy > bestValAccuracy
+        valLag = 0;
+        bestValAccuracy = info.ValidationAccuracy;
+    else
+        valLag = valLag + 1;
+    end
+    
+    % If the validation lag is at least N, that is, the validation accuracy
+    % has not improved for at least N validations, then return true and
+    % stop training.
+    if valLag >= N
+        stop = true;
+    end
+    
+end
+
 end

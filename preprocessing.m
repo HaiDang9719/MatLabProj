@@ -68,4 +68,5 @@ function initialization()
     addpath('evaluation');
     addpath('model');
     addpath('save_models');
+    addpath('pretrained');
 end

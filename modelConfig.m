@@ -6,7 +6,7 @@ function cfg = modelConfig()
     % set
     cfg.dataset.splitRatio = 0.2;
     %kford
-    cfg.dataset.kfoldvalidation = false;
+    cfg.dataset.kfoldvalidation = true;
     cfg.dataset.kfold = 10;
     
     
