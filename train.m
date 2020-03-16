@@ -19,7 +19,12 @@ if cfg.execMode == "train"
         model = load(cfg.model.pretrainedBiLSTM,'bilstmModel');
         %predict
         predict(model.bilstmModel,cfg,clean_text_test,clean_text_train,Y_test)
-     end     
+    elseif(cfg.model.MLmodel == "cnn")
+        %Load pretrained model
+        model = load(cfg.model.pretrainedCNN,'cnnModel');
+        %predict
+        predictCNN(model.cnnModel,cfg,clean_text_test,clean_text_train,Y_test)
+     end       
  end
  
  %Print result
@@ -35,6 +40,37 @@ if cfg.execMode == "train"
     X_test = doc2sequence(enc,clean_text_test,'Length',16);
     fprintf('Result of %s on test set: \n',upper(cfg.model.MLmodel));
     Y_pred_ls = classify(model,X_test);
+    lstm_acc = model_Acc(categorical(Y_test),Y_pred_ls);
+    fprintf('Accuracy for %s: %f\n',upper(cfg.model.MLmodel),lstm_acc*100);
+
+    [lsPre, lsRe, lsFS,lsFB,lsAUC] = model_FScore(categorical(Y_test),Y_pred_ls);
+    fprintf('Precision for %s: %f\n',upper(cfg.model.MLmodel),lsPre);
+    fprintf('Recal for %s: %f\n',upper(cfg.model.MLmodel),lsRe);
+    fprintf('FScore for %s: %f\n',upper(cfg.model.MLmodel),lsFS);
+    fprintf('FP for %s: %f\n',upper(cfg.model.MLmodel),lsFB);
+    fprintf('AUC for %s: %f\n',upper(cfg.model.MLmodel),lsAUC);
+    
+ end
+ 
+ %Print result
+ function predictCNN(model,cfg,clean_text_test,clean_text_train,Y_test)
+ 
+    fprintf('Testing  %s ...: \n',upper(cfg.model.MLmodel));
+    % create dictionary
+    if (cfg.model.fastTextWordEmbedding)
+        enc = fastTextWordEmbedding;
+    else
+        enc = trainWordEmbedding(clean_text_train);
+ 
+    end
+    X_test = doc2sequence(enc,clean_text_test,'Length',16);
+    fprintf('Result of %s on test set: \n',upper(cfg.model.MLmodel));
+    
+    predictorsTest = cellfun(@(X) permute(X,[3 2 1]),X_test,'UniformOutput',false);
+    responsesTest = categorical(Y_test,unique(Y_test));
+    dataTransformedTest = table(predictorsTest,responsesTest);
+    Y_pred_ls = classify(model,dataTransformedTest);
+    
     lstm_acc = model_Acc(categorical(Y_test),Y_pred_ls);
     fprintf('Accuracy for %s: %f\n',upper(cfg.model.MLmodel),lstm_acc*100);
 

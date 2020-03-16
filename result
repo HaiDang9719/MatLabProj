@@ -22,3 +22,13 @@ Recal for BiLSTM: 0.842146
 FScore for BiLSTM: 0.724900
 FP for BiLSTM: 0.363690
 AUC for BiLSTM: 0.842146
+
+Testing  CNN ...: 
+Training: 100% Loss: 2.55827  Remaining time: 0 hours 0 minutes.
+Result of CNN on test set: 
+Accuracy for CNN: 59.317212
+Precision for CNN: 0.608519
+Recal for CNN: 0.933126
+FScore for CNN: 0.736648
+FP for CNN: 0.391481
+AUC for CNN: 0.933126

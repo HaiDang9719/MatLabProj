@@ -6,7 +6,7 @@ function cfg = modelConfig()
     % set
     cfg.dataset.splitRatio = 0.2;
     %kford
-    cfg.dataset.kfoldvalidation = true;
+    cfg.dataset.kfoldvalidation = false;
     cfg.dataset.kfold = 10;
     
     
@@ -20,10 +20,10 @@ function cfg = modelConfig()
     %save bilstm path
     cfg.model.pretrainedBiLSTM = "save_models/bilstmModel";
     %save cnn path
-    cfg.model.pretrainedCNN = "save_models/cnnModel";
+    cfg.model.pretrainedCNN = "pretrained/cnnModel";
     
     % Execution mode:("train/test")
-    cfg.execMode = "train";
+    cfg.execMode = "test";
     
 
     

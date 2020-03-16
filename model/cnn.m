@@ -18,14 +18,6 @@ if (~cfg.dataset.kfoldvalidation)
     X_train = doc2sequence(enc,clean_text_train,'Length',16);
     X_val = doc2sequence(enc,clean_text_eval,'Length',16);
     X_test = doc2sequence(enc,clean_text_test,'Length',16);
-    
-    %Load data
-    filenameTrain = cfg.dataset.path;
-    textName = "headline";
-    labelName = "label";
-%     ttdsTrain = tabularTextDatastore(filenameTrain,'SelectedVariableNames',[textName labelName]);
-%     [trainingImages, testImages] = splitEachLabel(ttdsTrain, 0.8, 'randomize');
-%     labels = readLabels(ttdsTrain,labelName);
 
     predictorsTrain = cellfun(@(X) permute(X,[3 2 1]),X_train,'UniformOutput',false);
     predictorsTest = cellfun(@(X) permute(X,[3 2 1]),X_test,'UniformOutput',false);
@@ -67,14 +59,6 @@ elseif (cfg.dataset.kfoldvalidation)
         X_train = doc2sequence(enc,clean_text_train{i},'Length',16);
         X_val = doc2sequence(enc,clean_text_eval{i},'Length',16);
         X_test = doc2sequence(enc,clean_text_test{i},'Length',16);
-
-        %Load data
-        filenameTrain = cfg.dataset.path;
-        textName = "headline";
-        labelName = "label";
-    %     ttdsTrain = tabularTextDatastore(filenameTrain,'SelectedVariableNames',[textName labelName]);
-    %     [trainingImages, testImages] = splitEachLabel(ttdsTrain, 0.8, 'randomize');
-    %     labels = readLabels(ttdsTrain,labelName);
 
         predictorsTrain = cellfun(@(X) permute(X,[3 2 1]),X_train,'UniformOutput',false);
         predictorsTest = cellfun(@(X) permute(X,[3 2 1]),X_test,'UniformOutput',false);
