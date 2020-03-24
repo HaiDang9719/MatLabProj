@@ -30,9 +30,9 @@
 
         datasets: Folders contains different datasets for training and testing. There are two different set of datasets. 
                     
-                    AdHocAnnouncements dataset is the original dataset from this paper https://arxiv.org/pdf/1710.03954.pdf
+        - AdHocAnnouncements dataset is the original dataset from this paper https://arxiv.org/pdf/1710.03954.pdf
 
-                    daset2Label*: is the dataset we create on the similar method but in different periods, * represents for the way to build the dataset
+        - daset2Label*: is the dataset we create on the similar method but in different periods, * represents for the way to build the dataset
                     
 
 3. Instruction - training:
