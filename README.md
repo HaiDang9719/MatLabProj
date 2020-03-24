@@ -16,7 +16,26 @@
 
         6. Bioinformatics Toolbox
 
-2. Instruction - training:
+2. Folder structure
+
+        preprocess: Folder contains function to preprocess text before inputting to the model
+
+        evaluation: Folder contains function to evaluate the performance of the model
+
+        model: Folder contains model scripts
+
+        pretrained: Folder contains our pretrained model, it is usually used for predict without training
+
+        save_models: Folder contains your model after training
+
+        datasets: Folders contains different datasets for training and testing. There are two different set of datasets. 
+                    
+                    AdHocAnnouncements dataset is the original dataset from this paper https://arxiv.org/pdf/1710.03954.pdf
+
+                    daset2Label*: is the dataset we create on the similar method but in different periods, * represents for the way to build the dataset
+                    
+
+3. Instruction - training:
 
     Step1: Change the configuration in modeConfig.m
     
@@ -24,7 +43,7 @@
 
     Step3: Train the model with train.m
 
-3. Instruction - prediting: If you would like to test the model without training
+4. Instruction - prediting: If you would like to test the model without training
     
     Step1: Set configuration in modelConfig.m to cfg.execMode = "test", choose the model (lstm, bilstm, cnn) for loading pretrained model
 
