@@ -1,7 +1,9 @@
 function cfg = modelConfig()
     %% Dataset:
     % Dataset path:
-    cfg.dataset.path = "dataset2Lable.csv";
+    cfg.dataset.path = "dataset2LabelARFOUR.csv";
+    % Dataset sequence length, 16 - dataset2Label.csv, 150 - AdHocAnnoucements.csv 
+    cfg.dataset.sequenceLength = 16;
     % Split ratio for train set and test set, ex: 80% train set, 20% test
     % set
     cfg.dataset.splitRatio = 0.2;

@@ -1,6 +1,6 @@
 function [dataset] = loadData(csvPath)
     
-    if csvPath=="dataset2Lable.csv"
+    if csvPath=="dataset2Lable.csv" || csvPath=="dataset2LabelARFOUR.csv"
         
         % Load csv file
         dataset = readtable(csvPath);  
