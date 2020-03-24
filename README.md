@@ -18,21 +18,21 @@
 
 2. Folder structure
 
-        preprocess: Folder contains function to preprocess text before inputting to the model
+	preprocess: Folder contains function to preprocess text before inputting to the model
 
-        evaluation: Folder contains function to evaluate the performance of the model
+	evaluation: Folder contains function to evaluate the performance of the model
 
-        model: Folder contains model scripts
+	model: Folder contains model scripts
 
-        pretrained: Folder contains our pretrained model, it is usually used for predict without training
+	pretrained: Folder contains our pretrained model, it is usually used for predict without training
 
-        save_models: Folder contains your model after training
+	save_models: Folder contains your model after training
 
-        datasets: Folders contains different datasets for training and testing. There are two different set of datasets. 
-                    
-        - AdHocAnnouncements dataset is the original dataset from this paper https://arxiv.org/pdf/1710.03954.pdf
+	datasets: Folders contains different datasets for training and testing. There are two different set of datasets. 
 
-        - daset2Label*: is the dataset we create on the similar method but in different periods, * represents for the way to build the dataset
+	- AdHocAnnouncements dataset is the original dataset from this paper https://arxiv.org/pdf/1710.03954.pdf
+
+	- daset2Label*: is the dataset we create on the similar method but in different periods, * represents for the way to build the dataset
                     
 
 3. Instruction - training:
