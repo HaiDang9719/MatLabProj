@@ -1,10 +1,8 @@
-
-
 %% model Configuration.
 
 inputSize = 1;
 numHiddenUnits = 180;
-numClasses = 2;
+numClasses = cfg.dataset.numClass;
 
 %% training and testing model
 if (~cfg.dataset.kfoldvalidation)
@@ -22,9 +20,9 @@ if (~cfg.dataset.kfoldvalidation)
     end
     % encoding word with doc2sequence function. Set the threshold number of words based on the document length distribution
 
-    X_train = doc2sequence(enc,clean_text_train,'Length',16);
-    X_val = doc2sequence(enc,clean_text_eval,'Length',16);
-    X_test = doc2sequence(enc,clean_text_test,'Length',16);
+    X_train = doc2sequence(enc,clean_text_train,'Length',cfg.dataset.sequenceLength);
+    X_val = doc2sequence(enc,clean_text_eval,'Length',cfg.dataset.sequenceLength);
+    X_test = doc2sequence(enc,clean_text_test,'Length',cfg.dataset.sequenceLength);
 
     % training option for the model
 
@@ -92,9 +90,9 @@ else
         end
         % encoding word with doc2sequence function. Set the threshold number of words based on the document length distribution
 
-        X_train = doc2sequence(enc,clean_text_train{i},'Length',10);
-        X_val = doc2sequence(enc,clean_text_eval{i},'Length',10);
-        X_test = doc2sequence(enc,clean_text_test{i},'Length',10);
+        X_train = doc2sequence(enc,clean_text_train{i},'Length',cfg.dataset.sequenceLength);
+        X_val = doc2sequence(enc,clean_text_eval{i},'Length',cfg.dataset.sequenceLength);
+        X_test = doc2sequence(enc,clean_text_test{i},'Length',cfg.dataset.sequenceLength);
 
         % training option for the model
 

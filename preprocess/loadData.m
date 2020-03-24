@@ -1,6 +1,6 @@
 function [dataset] = loadData(csvPath)
     
-    if csvPath=="dataset2Lable.csv" || csvPath=="dataset2LabelARFOUR.csv"
+    if csvPath=="datasets/dataset2Lable.csv" || csvPath=="datasets/dataset2LabelARFOUR.csv"
         
         % Load csv file
         dataset = readtable(csvPath);  
@@ -8,7 +8,7 @@ function [dataset] = loadData(csvPath)
         dataset.Properties.VariableNames{8} = 'text';
         dataset.Properties.VariableNames{9} = 'label';
         
-    elseif csvPath=="AdHocAnnouncements.csv"
+    elseif csvPath=="datasets/AdHocAnnouncements.csv"
         % Load csv file
         dataset = readtable(csvPath);  
         header={'label','text'};

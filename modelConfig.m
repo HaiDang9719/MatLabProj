@@ -1,9 +1,11 @@
 function cfg = modelConfig()
     %% Dataset:
     % Dataset path:
-    cfg.dataset.path = "dataset2LabelARFOUR.csv";
-    % Dataset sequence length, 16 - dataset2Label.csv, 150 - AdHocAnnoucements.csv 
-    cfg.dataset.sequenceLength = 16;
+    cfg.dataset.path = "datasets/AdHocAnnouncements.csv";
+    % Dataset average sequence length, 16 - dataset2Label.csv, 150 - AdHocAnnouncements.csv 
+    cfg.dataset.sequenceLength = 150;
+    % Number of class label
+    cfg.dataset.numClass = 2;
     % Split ratio for train set and test set, ex: 80% train set, 20% test
     % set
     cfg.dataset.splitRatio = 0.2;
@@ -25,7 +27,7 @@ function cfg = modelConfig()
     cfg.model.pretrainedCNN = "pretrained/cnnModel";
     
     % Execution mode:("train/test")
-    cfg.execMode = "test";
+    cfg.execMode = "train";
     
 
     

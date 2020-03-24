@@ -15,9 +15,9 @@ if (~cfg.dataset.kfoldvalidation)
         
     % encoding word with doc2sequence function. Set the threshold number of words based on the document length distribution
 
-    X_train = doc2sequence(enc,clean_text_train,'Length',16);
-    X_val = doc2sequence(enc,clean_text_eval,'Length',16);
-    X_test = doc2sequence(enc,clean_text_test,'Length',16);
+    X_train = doc2sequence(enc,clean_text_train,'Length',cfg.dataset.sequenceLength);
+    X_val = doc2sequence(enc,clean_text_eval,'Length',cfg.dataset.sequenceLength);
+    X_test = doc2sequence(enc,clean_text_test,'Length',cfg.dataset.sequenceLength);
 
     predictorsTrain = cellfun(@(X) permute(X,[3 2 1]),X_train,'UniformOutput',false);
     predictorsTest = cellfun(@(X) permute(X,[3 2 1]),X_test,'UniformOutput',false);
@@ -30,8 +30,8 @@ if (~cfg.dataset.kfoldvalidation)
     dataTransformedTrain = table(predictorsTrain,responsesTrain);
     dataTransformedTest = table(predictorsTest,responsesTest);
     dataTransformedEval = table(predictorsEval,responsesEval);
-    numClasses = 2;
-    sequenceLength = 16;
+    numClasses = cfg.dataset.numClass;
+    sequenceLength = cfg.dataset.sequenceLength;
     buildandTrainCNN(embeddingDimension,Y_train,Y_test,sequenceLength,numClasses,dataTransformedEval,dataTransformedTest,dataTransformedTrain, false);
 
 elseif (cfg.dataset.kfoldvalidation)
@@ -56,9 +56,9 @@ elseif (cfg.dataset.kfoldvalidation)
 
         % encoding word with doc2sequence function. Set the threshold number of words based on the document length distribution
 
-        X_train = doc2sequence(enc,clean_text_train{i},'Length',16);
-        X_val = doc2sequence(enc,clean_text_eval{i},'Length',16);
-        X_test = doc2sequence(enc,clean_text_test{i},'Length',16);
+        X_train = doc2sequence(enc,clean_text_train{i},'Length',cfg.dataset.sequenceLength);
+        X_val = doc2sequence(enc,clean_text_eval{i},'Length',cfg.dataset.sequenceLength);
+        X_test = doc2sequence(enc,clean_text_test{i},'Length',cfg.dataset.sequenceLength);
 
         predictorsTrain = cellfun(@(X) permute(X,[3 2 1]),X_train,'UniformOutput',false);
         predictorsTest = cellfun(@(X) permute(X,[3 2 1]),X_test,'UniformOutput',false);
@@ -71,8 +71,8 @@ elseif (cfg.dataset.kfoldvalidation)
         dataTransformedTrain = table(predictorsTrain,responsesTrain);
         dataTransformedTest = table(predictorsTest,responsesTest);
         dataTransformedEval = table(predictorsEval,responsesEval);
-        numClasses = 2;
-        sequenceLength = 16;
+        numClasses = cfg.dataset.numClass;
+        sequenceLength = cfg.dataset.sequenceLength;
         [cnn_acc(i),cnnPre(i),cnnRe(i),cnnFS(i),cnnFB(i),cnnAUC(i)] = buildandTrainCNN(embeddingDimension,Y_train{i},Y_test{i},sequenceLength,numClasses,dataTransformedEval,dataTransformedTest,dataTransformedTrain, true);
     end
     %print result
@@ -91,9 +91,9 @@ end
 function[cnn_acc,cnnPre,cnnRe,cnnFS,cnnFB,cnnAUC] = buildandTrainCNN(embeddingDimension,Y_train,Y_test,sequenceLength,numClasses,dataTransformedEval,dataTransformedTest,dataTransformedTrain,Kfold)
 %     classNames = unique(labels);
     numObservations = numel(Y_train);
-
+    
     numFeatures = embeddingDimension;
-    inputSize = [1 16 numFeatures];
+    inputSize = [1 sequenceLength numFeatures];
     numFilters = 200;
 
     ngramLengths = [2 3 4 5];

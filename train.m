@@ -37,7 +37,7 @@ if cfg.execMode == "train"
     else
         enc = wordEncoding(clean_text_train);
     end
-    X_test = doc2sequence(enc,clean_text_test,'Length',16);
+    X_test = doc2sequence(enc,clean_text_test,'Length',cfg.dataset.sequenceLength);
     fprintf('Result of %s on test set: \n',upper(cfg.model.MLmodel));
     Y_pred_ls = classify(model,X_test);
     lstm_acc = model_Acc(categorical(Y_test),Y_pred_ls);
@@ -63,7 +63,7 @@ if cfg.execMode == "train"
         enc = trainWordEmbedding(clean_text_train);
  
     end
-    X_test = doc2sequence(enc,clean_text_test,'Length',16);
+    X_test = doc2sequence(enc,clean_text_test,'Length',cfg.dataset.sequenceLength);
     fprintf('Result of %s on test set: \n',upper(cfg.model.MLmodel));
     
     predictorsTest = cellfun(@(X) permute(X,[3 2 1]),X_test,'UniformOutput',false);

@@ -1,4 +1,3 @@
-
 clear; close all; clc
 initialization();
 
@@ -69,4 +68,5 @@ function initialization()
     addpath('model');
     addpath('save_models');
     addpath('pretrained');
+    addpath('datasets');
 end
