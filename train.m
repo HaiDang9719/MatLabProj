@@ -7,6 +7,8 @@ if cfg.execMode == "train"
         bilstm()
     elseif(cfg.model.MLmodel == "cnn")
         cnn()
+    else
+        fprintf('Wrong model configuration. Please check model name in configuration again. \n');
     end
  elseif cfg.execMode == "test"
      if(cfg.model.MLmodel == "lstm")

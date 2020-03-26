@@ -34,8 +34,7 @@ if (~cfg.dataset.kfoldvalidation)
     %LSTM model
     lstmModel = [ ...
     sequenceInputLayer(inputSize)
-    wordEmbeddingLayer(embeddingDimension,numWords)
-
+   
     lstmLayer(numHiddenUnits,'OutputMode','last')
     fullyConnectedLayer(numClasses)
     softmaxLayer
