@@ -3,7 +3,7 @@ function cfg = modelConfig()
     % Dataset path:
     cfg.dataset.path = "datasets/dataset2Label.csv";
     % Dataset average sequence length, 16 - dataset2Label.csv, dataset2Label*.csv, 150 - AdHocAnnouncements.csv 
-    cfg.dataset.sequenceLength = 150;
+    cfg.dataset.sequenceLength = 16;
     % Number of class label
     cfg.dataset.numClass = 2;
     % Split ratio for train set and test set, ex: 80% train set, 20% test
@@ -16,9 +16,9 @@ function cfg = modelConfig()
     
     % Model:
     %model (lstm, bilstm, cnn)
-    cfg.model.MLmodel = "lstm";
+    cfg.model.MLmodel = "cnn";
     %pretrained wordembedding layer with fastTextWordEmbedding
-    cfg.model.fastTextWordEmbedding = true;
+    cfg.model.fastTextWordEmbedding = false;
     %save lstm path
     cfg.model.pretrainedLSTM = "pretrained/lstmModel";
     %save bilstm path

@@ -1,18 +1,51 @@
 Result of LSTM on test set with kfold cross validation: 
-Accuracy for LSTM: 59.905123
-Precision for LSTM: 0.639557
-Recal for LSTM: 0.786834
-FScore for LSTM: 0.704534
-FP for LSTM: 0.360443
-AUC for LSTM: 0.786834
+Accuracy for LSTM: 60.199241
+Precision for LSTM: 0.645454
+Recal for LSTM: 0.770966
+FScore for LSTM: 0.701839
+FP for LSTM: 0.354546
+AUC for LSTM: 0.770966
 
-Result of BiLSTM on test set with kflod cross validation: 
-Accuracy for BiLSTM: 59.165085
-Precision for BiLSTM: 0.636691
-Recal for BiLSTM: 0.771265
-FScore for BiLSTM: 0.695322
-FP for BiLSTM: 0.363309
-AUC for BiLSTM: 0.771265
+Result of LSTM on test set: 
+Accuracy for LSTM: 62.713472
+Precision for LSTM: 0.646714
+Recal for LSTM: 0.856921
+FScore for LSTM: 0.737124
+FP for LSTM: 0.353286
+AUC for LSTM: 0.856921
+
+Result of LSTM on test set pretrained: 
+Result of LSTM on test set: 
+Accuracy for LSTM: 63.662239
+Precision for LSTM: 0.638298
+Recal for LSTM: 0.933126
+FScore for LSTM: 0.758054
+FP for LSTM: 0.361702
+AUC for LSTM: 0.933126
+
+Result of LSTM on test set with kfold cross validation with pretrained: 
+Accuracy for LSTM: 61.271347
+Precision for LSTM: 0.629826
+Recal for LSTM: 0.887663
+FScore for LSTM: 0.735783
+FP for LSTM: 0.370174
+AUC for LSTM: 0.887663
+
+Result of BiLSTM on test set with kflod cross validation with pretrained: 
+Accuracy for BiLSTM: 61.622391
+Precision for BiLSTM: 0.623737
+Recal for BiLSTM: 0.935716
+FScore for BiLSTM: 0.748038
+FP for BiLSTM: 0.376263
+AUC for BiLSTM: 0.935716
+
+Result of BiLSTM on test set with kfold cross validation: 
+Average Accuracy for BiLSTM: 60.977230
+Average Precision for BiLSTM: 0.646785
+Average Recal for BiLSTM: 0.793995
+Average FScore for BiLSTM: 0.712441
+Average FP for BiLSTM: 0.353215
+Average AUC for BiLSTM: 0.793995
 
 Train BILSTM ...: 
 Result of BiLSTM on test set: 
@@ -23,12 +56,38 @@ FScore for BiLSTM: 0.724900
 FP for BiLSTM: 0.363690
 AUC for BiLSTM: 0.842146
 
+Result of BiLSTM on test set with pretrained: 
+Result of BiLSTM on test set: 
+Accuracy for BiLSTM: 63.567362
+Precision for BiLSTM: 0.632821
+Recal for BiLSTM: 0.959565
+FScore for BiLSTM: 0.762670
+FP for BiLSTM: 0.367179
+AUC for BiLSTM: 0.959565
+
 Testing  CNN ...: 
-Training: 100% Loss: 2.55827  Remaining time: 0 hours 0 minutes.
+Training: 100% Loss: 2.54324  Remaining time: 0 hours 0 minutes.
 Result of CNN on test set: 
-Accuracy for CNN: 59.317212
-Precision for CNN: 0.608519
-Recal for CNN: 0.933126
-FScore for CNN: 0.736648
-FP for CNN: 0.391481
-AUC for CNN: 0.933126
+Accuracy for CNN: 60.265529
+Precision for CNN: 0.631920
+Recal for CNN: 0.834370
+FScore for CNN: 0.719169
+FP for CNN: 0.368080
+AUC for CNN: 0.834370
+
+Train CNN ...: 
+Result of CNN on test set with pretrained: 
+Accuracy for CNN: 58.179232
+Precision for CNN: 0.656832
+Recal for CNN: 0.657854
+FScore for CNN: 0.657343
+FP for CNN: 0.343168
+AUC for CNN: 0.657854
+
+Result of CNN on test set with kfold cross validation: 
+Average Accuracy for CNN: 59.240987
+Average Precision for CNN: 0.630812
+Average Recal for CNN: 0.801174
+Average FScore for CNN: 0.704440
+Average FP for CNN: 0.369188
+Average AUC for CNN: 0.801174

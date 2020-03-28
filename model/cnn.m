@@ -73,8 +73,14 @@ elseif (cfg.dataset.kfoldvalidation)
         dataTransformedEval = table(predictorsEval,responsesEval);
         numClasses = cfg.dataset.numClass;
         sequenceLength = cfg.dataset.sequenceLength;
-        [cnn_acc(i),cnnPre(i),cnnRe(i),cnnFS(i),cnnFB(i),cnnAUC(i)] = buildandTrainCNN(embeddingDimension,Y_train{i},Y_test{i},sequenceLength,numClasses,dataTransformedEval,dataTransformedTest,dataTransformedTrain, true);
+        if i==1
+            [cnn_acc(i),cnnPre(i),cnnRe(i),cnnFS(i),cnnFB(i),cnnAUC(i),lgraph,options] = buildandTrainCNN(embeddingDimension,Y_train{i},Y_test{i},sequenceLength,numClasses,dataTransformedEval,dataTransformedTest,dataTransformedTrain, true);
+        else
+            [cnn_acc(i),cnnPre(i),cnnRe(i),cnnFS(i),cnnFB(i),cnnAUC(i)] = TrainCNN(embeddingDimension,Y_train{i},Y_test{i},sequenceLength,numClasses,dataTransformedEval,dataTransformedTest,dataTransformedTrain, true,lgraph, options);
+        end
+            
     end
+  
     %print result
     fprintf('Result of CNN on test set with kfold cross validation: \n');
     fprintf('Average Accuracy for CNN: %f\n',mean(cnn_acc)*100);
@@ -88,7 +94,31 @@ elseif (cfg.dataset.kfoldvalidation)
 end
 
 %% CNN model
-function[cnn_acc,cnnPre,cnnRe,cnnFS,cnnFB,cnnAUC] = buildandTrainCNN(embeddingDimension,Y_train,Y_test,sequenceLength,numClasses,dataTransformedEval,dataTransformedTest,dataTransformedTrain,Kfold)
+function[cnn_acc,cnnPre,cnnRe,cnnFS,cnnFB,cnnAUC] = TrainCNN(embeddingDimension,Y_train,Y_test,sequenceLength,numClasses,dataTransformedEval,dataTransformedTest,dataTransformedTrain,Kfold,lgraph,options)
+
+        cnnModel = trainNetwork(dataTransformedTrain,lgraph,options);
+    
+
+%     
+    %save model
+    saveModel(cnnModel);
+    
+    %testing
+    fprintf('Result of CNN on test set: \n');
+    Y_pred_ls = classify(cnnModel,dataTransformedTest);
+    cnn_acc = model_Acc(categorical(Y_test),Y_pred_ls);
+    fprintf('Accuracy for CNN: %f\n',cnn_acc*100);
+
+    [cnnPre, cnnRe, cnnFS,cnnFB,cnnAUC] = model_FScore(categorical(Y_test),Y_pred_ls);
+    fprintf('Precision for CNN: %f\n',cnnPre);
+    fprintf('Recal for CNN: %f\n',cnnRe);
+    fprintf('FScore for CNN: %f\n',cnnFS);
+    fprintf('FP for CNN: %f\n',cnnFB);
+    fprintf('AUC for CNN: %f\n',cnnAUC);
+end
+
+%% CNN model
+function[cnn_acc,cnnPre,cnnRe,cnnFS,cnnFB,cnnAUC,lgraph,options] = buildandTrainCNN(embeddingDimension,Y_train,Y_test,sequenceLength,numClasses,dataTransformedEval,dataTransformedTest,dataTransformedTrain,Kfold)
 %     classNames = unique(labels);
     numObservations = numel(Y_train);
     
@@ -156,7 +186,7 @@ function[cnn_acc,cnnPre,cnnRe,cnnFS,cnnFB,cnnAUC] = buildandTrainCNN(embeddingDi
         cnnModel = trainNetwork(dataTransformedTrain,lgraph,options);
     end
     
-
+    %analyzeNetwork(cnnModel)
 %     
     %save model
     saveModel(cnnModel);

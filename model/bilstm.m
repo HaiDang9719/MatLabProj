@@ -4,19 +4,38 @@ inputSize = 1;
 numHiddenUnits = 180;
 numClasses = cfg.dataset.numClass;
 
-%% training and testing model
-if (~cfg.dataset.kfoldvalidation)
-    
-    % create dictionary
-    if (cfg.model.fastTextWordEmbedding)
+%% Pretrained word embedding
+if (cfg.model.fastTextWordEmbedding)
         enc = fastTextWordEmbedding;
         embeddingDimension = enc.Dimension;
         words = enc.Vocabulary;
         numWords = numel(words);
+        %BiLSTM model
+        bilstmModel = [ ...
+            sequenceInputLayer(embeddingDimension)
+            bilstmLayer(numHiddenUnits,'OutputMode','last')
+            fullyConnectedLayer(numClasses)
+            softmaxLayer
+            classificationLayer];
+end
+%% training and testing model
+if (~cfg.dataset.kfoldvalidation)
+    
+    % create dictionary
+    if (~cfg.model.fastTextWordEmbedding)
     else
         enc = wordEncoding(clean_text_train);
         embeddingDimension = 100;
         numWords = enc.NumWords;
+            
+        %BiLSTM model
+        bilstmModel = [ ...
+            sequenceInputLayer(inputSize)
+            wordEmbeddingLayer(embeddingDimension,numWords)
+            bilstmLayer(numHiddenUnits,'OutputMode','last')
+            fullyConnectedLayer(numClasses)
+            softmaxLayer
+            classificationLayer];
     end
     % encoding word with doc2sequence function. Set the threshold number of words based on the document length distribution
 
@@ -31,44 +50,11 @@ if (~cfg.dataset.kfoldvalidation)
     catch ME
     end
     
-    %BiLSTM model
-    bilstmModel = [ ...
-    sequenceInputLayer(inputSize)
-    wordEmbeddingLayer(embeddingDimension,numWords)
-    bilstmLayer(numHiddenUnits,'OutputMode','last')
-    fullyConnectedLayer(numClasses)
-    softmaxLayer
-    classificationLayer];
-    
-    %Option
-    options = trainingOptions('adam', ...
-        'ExecutionEnvironment','auto',...
-        'MaxEpochs',10, ...    
-        'GradientThreshold',1, ...
-        'InitialLearnRate',0.001, ...
-        'ValidationData',{X_val,categorical(Y_val)}, ...
-        'Plots','training-progress', ...
-        'Verbose',false, ...
-        'OutputFcn',@(info)stopIfAccuracyNotImproving(info,3));
     
     %training
-    bilstmModel = trainNetwork(X_train,categorical(Y_train),bilstmModel,options);
+    BuildandTrainBiLSTM(bilstmModel,X_val,Y_val,X_test,Y_test,X_train,Y_train,false);
     
-    %save model
-    saveModel(bilstmModel);
-    
-    %testing
-    fprintf('Result of BiLSTM on test set: \n');
-    Y_pred_ls = classify(bilstmModel,X_test);
-    bilstm_acc = model_Acc(categorical(Y_test),Y_pred_ls);
-    fprintf('Accuracy for BiLSTM: %f\n',bilstm_acc*100);
 
-    [lsPre, lsRe, lsFS,lsFB,lsAUC] = model_FScore(categorical(Y_test),Y_pred_ls);
-    fprintf('Precision for BiLSTM: %f\n',lsPre);
-    fprintf('Recal for BiLSTM: %f\n',lsRe);
-    fprintf('FScore for BiLSTM: %f\n',lsFS);
-    fprintf('FP for BiLSTM: %f\n',lsFB);
-    fprintf('AUC for BiLSTM: %f\n',lsAUC);
 else
     bilstm_acc=zeros(cfg.dataset.kfold,1); 
     lsPre=zeros(cfg.dataset.kfold,1); 
@@ -78,58 +64,27 @@ else
     lsAUC=zeros(cfg.dataset.kfold,1); 
     for i=1:cfg.dataset.kfold
         % create dictionary
-        if (cfg.model.fastTextWordEmbedding)
-            enc = fastTextWordEmbedding;
-            embeddingDimension = enc.Dimension;
-            words = enc.Vocabulary;
-            numWords = numel(words);
-        else
+        if (~cfg.model.fastTextWordEmbedding)
             enc = wordEncoding(clean_text_train{i});
             embeddingDimension = 100;
             numWords = enc.NumWords;
+            %BiLSTM model
+            bilstmModel = [ ...
+                sequenceInputLayer(inputSize)
+                wordEmbeddingLayer(embeddingDimension,numWords)
+                bilstmLayer(numHiddenUnits,'OutputMode','last')
+                fullyConnectedLayer(numClasses)
+                softmaxLayer
+                classificationLayer];
         end
         % encoding word with doc2sequence function. Set the threshold number of words based on the document length distribution
 
         X_train = doc2sequence(enc,clean_text_train{i},'Length',cfg.dataset.sequenceLength);
         X_val = doc2sequence(enc,clean_text_eval{i},'Length',cfg.dataset.sequenceLength);
         X_test = doc2sequence(enc,clean_text_test{i},'Length',cfg.dataset.sequenceLength);
-
-        % training option for the model
-
-        try
-            nnet.internal.cnngpu.reluForward(1);
-        catch ME
-        end
-        
-        %BiLSTM model
-        bilstmModel = [ ...
-        sequenceInputLayer(inputSize)
-        wordEmbeddingLayer(embeddingDimension,numWords)
-        bilstmLayer(numHiddenUnits,'OutputMode','last')
-        fullyConnectedLayer(numClasses)
-        softmaxLayer
-        classificationLayer];
-        
-        %Option
-        options = trainingOptions('adam', ...
-            'ExecutionEnvironment','auto',...
-            'MaxEpochs',10, ...    
-            'GradientThreshold',1, ...
-            'InitialLearnRate',0.001, ...
-            'ValidationData',{X_val,categorical(Y_val{i})}, ...
-            'Verbose',false, ...
-            'OutputFcn',@(info)stopIfAccuracyNotImproving(info,3));
         
         %training
-        bilstmModel = trainNetwork(X_train,categorical(Y_train{i}),bilstmModel,options);
-
-        %testing
-        
-        Y_pred_ls = classify(bilstmModel,X_test);
-        bilstm_acc(i) = model_Acc(categorical(Y_test{i}),Y_pred_ls);
-        
-
-        [lsPre(i), lsRe(i), lsFS(i),lsFB(i),lsAUC(i)] = model_FScore(categorical(Y_test{i}),Y_pred_ls);
+        [bilstm_acc(i),lsPre(i), lsRe(i), lsFS(i),lsFB(i),lsAUC(i)] = BuildandTrainBiLSTM(bilstmModel,X_val,Y_val{i},X_test,Y_test{i},X_train,Y_train{i},true);
         
     end
     %save model
@@ -137,13 +92,56 @@ else
     
     %print result
     fprintf('Result of BiLSTM on test set with kfold cross validation: \n');
-    fprintf('Accuracy for BiLSTM: %f\n',mean(bilstm_acc)*100);
-    fprintf('Precision for BiLSTM: %f\n',mean(lsPre));
-    fprintf('Recal for BiLSTM: %f\n',mean(lsRe));
-    fprintf('FScore for BiLSTM: %f\n',mean(lsFS));
-    fprintf('FP for BiLSTM: %f\n',mean(lsFB));
-    fprintf('AUC for BiLSTM: %f\n',mean(lsAUC));
+    fprintf('Average Accuracy for BiLSTM: %f\n',mean(bilstm_acc)*100);
+    fprintf('Average Precision for BiLSTM: %f\n',mean(lsPre));
+    fprintf('Average Recal for BiLSTM: %f\n',mean(lsRe));
+    fprintf('Average FScore for BiLSTM: %f\n',mean(lsFS));
+    fprintf('Average FP for BiLSTM: %f\n',mean(lsFB));
+    fprintf('Average AUC for BiLSTM: %f\n',mean(lsAUC));
 end
+
+%% BiLSTM model
+function[bilstm_acc,bilsPre, bilsRe, bilsFS,bilsFB,bilsAUC] = BuildandTrainBiLSTM(bilstmModel,X_val,Y_val,X_test,Y_test,X_train,Y_train,Kfold)
+    
+    %Option
+    if (Kfold)
+        options = trainingOptions('adam', ...
+            'ExecutionEnvironment','auto',...
+            'MaxEpochs',10, ...    
+            'GradientThreshold',1, ...
+            'InitialLearnRate',0.001, ...
+            'ValidationData',{X_val,categorical(Y_val)}, ...
+            'Verbose',false, ...
+            'OutputFcn',@(info)stopIfAccuracyNotImproving(info,3));
+    else
+         options = trainingOptions('adam', ...
+            'ExecutionEnvironment','auto',...
+            'MaxEpochs',10, ...    
+            'GradientThreshold',1, ...
+            'InitialLearnRate',0.001, ...
+            'ValidationData',{X_val,categorical(Y_val)}, ...
+            'Plots','training-progress', ...
+            'Verbose',false, ...
+            'OutputFcn',@(info)stopIfAccuracyNotImproving(info,3));
+    end
+    bilstmModel = trainNetwork(X_train,categorical(Y_train),bilstmModel,options);
+    %save model
+    saveModel(bilstmModel);
+    
+    %testing
+    fprintf('Result of BiLSTM on test set: \n');
+    Y_pred_ls = classify(bilstmModel,X_test);
+    bilstm_acc = model_Acc(categorical(Y_test),Y_pred_ls);
+    fprintf('Accuracy for BiLSTM: %f\n',bilstm_acc*100);
+
+    [bilsPre, bilsRe, bilsFS,bilsFB,bilsAUC] = model_FScore(categorical(Y_test),Y_pred_ls);
+    fprintf('Precision for BiLSTM: %f\n',bilsPre);
+    fprintf('Recal for BiLSTM: %f\n',bilsRe);
+    fprintf('FScore for BiLSTM: %f\n',bilsFS);
+    fprintf('FP for BiLSTM: %f\n',bilsFB);
+    fprintf('AUC for BiLSTM: %f\n',bilsAUC);
+end
+
 %% save model
 function saveModel(bilstmModel)
     save('save_models/bilstmModel','bilstmModel')

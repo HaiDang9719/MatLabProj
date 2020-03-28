@@ -1,6 +1,6 @@
 function [dataset] = loadData(csvPath)
     
-    if csvPath=="datasets/dataset2Lable.csv" || csvPath=="datasets/dataset2LabelARFOUR.csv"
+    if csvPath=="datasets/dataset2Label.csv" || csvPath=="datasets/dataset2LabelMKT.csv" || csvPath=="datasets/dataset2LabelARFOUR.csv"
         
         % Load csv file
         dataset = readtable(csvPath);  
@@ -14,6 +14,8 @@ function [dataset] = loadData(csvPath)
         header={'label','text'};
         dataset.Properties.VariableNames{2} = 'text';
         dataset.Properties.VariableNames{6} = 'label';
+    else
+        fprintf("check your csv path");
     end
 %     dataset.Properties.VariableNames{2} = 'text';
 %     dataset.Properties.VariableNames{6} = 'label';
