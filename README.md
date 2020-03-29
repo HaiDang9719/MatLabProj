@@ -24,15 +24,15 @@
 
 	model: Folder contains model scripts
 
-	pretrained: Folder contains our pretrained model, it is usually used for predict without training
+	pretrained: Folder contains our pretrained model, it is usually used for predict without training(deep learning approaches)
 
-	save_models: Folder contains your model after training
+	save_models: Folder contains your model after training(deep learning approaches)
 
 	datasets: Folders contains different datasets for training and testing. There are two different set of datasets. 
 
 	- AdHocAnnouncements dataset is the original dataset from this paper https://arxiv.org/pdf/1710.03954.pdf
 
-	- daset2Label*: is the dataset we create on the similar method but in different periods, * represents for the way to build the dataset
+	- daset2Label: is the dataset we create on the similar method but in different periods.
                     
 
 3. Instruction - training:
