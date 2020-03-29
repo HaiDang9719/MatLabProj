@@ -151,12 +151,12 @@ FP for SVM: 0.356959
 AUC for SVM: 0.776050
 
 Result of NAIVEBAYES on test set with kfold cross validation: 
-Average Accuracy for NAIVEBAYES: 60.341556
-Average Precision for NAIVEBAYES: 0.651822
-Average Recal for NAIVEBAYES: 0.751166
-Average FScore for NAIVEBAYES: 0.697977
-Average FP for NAIVEBAYES: 0.348178
-Average AUC for NAIVEBAYES: 0.751166
+Average Accuracy for NAIVEBAYES: 58.728653
+Average Precision for NAIVEBAYES: 0.639785
+Average Recal for NAIVEBAYES: 0.740280
+Average FScore for NAIVEBAYES: 0.686373
+Average FP for NAIVEBAYES: 0.360215
+Average AUC for NAIVEBAYES: 0.740280
 
 Accuracy for NAIVEBAYES: 58.633776
 Precision for NAIVEBAYES: 0.638554
