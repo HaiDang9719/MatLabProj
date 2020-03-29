@@ -2,7 +2,7 @@ function cfg = modelConfig()
     %% Dataset:
     % Dataset path:
     cfg.dataset.path = "datasets/dataset2Label.csv";
-    % Dataset average sequence length, 16 - dataset2Label.csv, dataset2Label*.csv, 150 - AdHocAnnouncements.csv 
+    % Dataset average sequence length, 16 - dataset2Label.csv, 150 - AdHocAnnouncements.csv 
     cfg.dataset.sequenceLength = 16;
     % Number of class label
     cfg.dataset.numClass = 2;
@@ -17,7 +17,8 @@ function cfg = modelConfig()
     % Model:
     %model (lstm, bilstm, cnn,svm,naiveBayes)
     cfg.model.MLmodel = "lstm";
-    %pretrained wordembedding layer with fastTextWordEmbedding
+    %pretrained wordembedding layer with fastTextWordEmbedding(only for
+    %deep learning models)
     cfg.model.fastTextWordEmbedding = false;
     %save lstm path
     cfg.model.pretrainedLSTM = "pretrained/lstmModel";

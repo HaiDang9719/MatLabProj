@@ -30,6 +30,8 @@ if cfg.execMode == "train"
         model = load(cfg.model.pretrainedCNN,'cnnModel');
         %predict
         predictCNN(model.cnnModel,cfg,clean_text_test,clean_text_train,Y_test)
+    else
+        fprintf('This model does not have pretrained version. \n');
      end       
  end
  
