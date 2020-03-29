@@ -16,7 +16,7 @@ function cfg = modelConfig()
     
     % Model:
     %model (lstm, bilstm, cnn)
-    cfg.model.MLmodel = "cnn";
+    cfg.model.MLmodel = "lstm";
     %pretrained wordembedding layer with fastTextWordEmbedding
     cfg.model.fastTextWordEmbedding = false;
     %save lstm path

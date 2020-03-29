@@ -88,7 +88,7 @@ else
     fprintf('Average AUC for LSTM: %f\n',mean(lsAUC));
 end
 
-%% BiLSTM model
+%% LSTM model
 function[lstm_acc,lsPre, lsRe, lsFS,lsFB,lsAUC] = BuildandTrainLSTM(lstmModel,X_val,Y_val,X_test,Y_test,X_train,Y_train,Kfold)
     
     %Option
