@@ -1,6 +1,7 @@
 function cfg = modelConfig()
     %% Dataset:
-    % Dataset path:
+    % Dataset path:("datasets/dataset2Label.csv",
+    % "datasets/AdHocAnnouncements.csv")
     cfg.dataset.path = "datasets/dataset2Label.csv";
     % Dataset average sequence length, 16 - dataset2Label.csv, 150 - AdHocAnnouncements.csv 
     cfg.dataset.sequenceLength = 16;
