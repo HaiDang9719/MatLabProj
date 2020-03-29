@@ -15,7 +15,7 @@ function cfg = modelConfig()
     
     
     % Model:
-    %model (lstm, bilstm, cnn)
+    %model (lstm, bilstm, cnn,svm,naiveBayes)
     cfg.model.MLmodel = "lstm";
     %pretrained wordembedding layer with fastTextWordEmbedding
     cfg.model.fastTextWordEmbedding = false;

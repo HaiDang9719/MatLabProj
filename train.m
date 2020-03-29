@@ -7,6 +7,10 @@ if cfg.execMode == "train"
         bilstm()
     elseif(cfg.model.MLmodel == "cnn")
         cnn()
+    elseif(cfg.model.MLmodel == "svm")
+        svm()
+    elseif(cfg.model.MLmodel == "naiveBayes")
+        naiveBayes()
     else
         fprintf('Wrong model configuration. Please check model name in configuration again. \n');
     end
